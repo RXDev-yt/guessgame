@@ -1,30 +1,4 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
-
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
-
-app.use(express.static(path.join(__dirname)));
-
-const EDITIONS = {
-  roblox: { name: 'Roblox', words: [
-    {word:'Adopt Me',clue:'Popular game where you raise and trade virtual pets'},
-    {word:'Brookhaven',clue:'Roleplay game where you live in a town and own homes'},
-    {word:'Jailbreak',clue:'Cops vs robbers open-world game with heists'},
-    {word:'Tower of Hell',clue:'Obby game with no checkpoints that gets harder'},
-    {word:'Arsenal',clue:'FPS game where you cycle through all weapons to win'},
-    {word:'Piggy',clue:'Horror game based on Peppa Pig where you escape a monster'},
-    {word:'Bedwars',clue:'Protect your bed while destroying others in this team game'},
-    {word:'Murder Mystery 2',clue:'One murderer, one sheriff, everyone else is innocent'},
-    {word:'Blox Fruits',clue:'One Piece inspired game with devil fruits and fighting'},
-    {word:'Pet Simulator',clue:'Collect and upgrade pets to earn coins and gems'}
-  ]},
-  clashroyale: { name: 'Clash Royale', words: [
-    {word:'Goblin Barrel',clue:'A barrel is thrown and three goblins pop out at the tower'},
-    {word:'Hog Rider',clue:'A muscular man riding a hog charges at the tower'},
+iding a hog charges at the tower'},
     {word:'Skeleton Army',clue:'A huge mob of skeletons that swarms enemies'},
     {word:'Fireball',clue:'A ball of fire launched that deals area damage'},
     {word:'Witch',clue:'A flying unit that spawns skeletons'},
