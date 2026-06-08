@@ -1,170 +1,763 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RXDev | GFX & UI Design</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #030303; color: white; cursor: none; overflow-x: hidden; }
-        
-        #cursor-outline {
-            width: 35px; height: 35px; border: 2px solid #ff00ff;
-            position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999;
-            box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Guess The Imposter</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{background:#080808;color:#f0f0f0;font-family:'Inter',sans-serif;height:100%;overflow:hidden}
+.sc{display:none;position:fixed;inset:0;flex-direction:column;background:#080808;z-index:1}
+.sc.on{display:flex}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.title{font-family:'Bebas Neue',sans-serif;letter-spacing:3px}
+.mono{font-family:'JetBrains Mono',monospace}
+.dim{color:#555}
+.inner{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px}
+.inner::-webkit-scrollbar{display:none}
+.topbar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #1a1a1a;background:#080808;flex-shrink:0;z-index:10}
+.topbar-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;flex:1}
+.back-btn{background:none;border:1px solid #222;color:#555;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;padding:6px 12px;transition:all .15s;flex-shrink:0}
+.back-btn:hover{border-color:#444;color:#f0f0f0}
+input[type=text]{width:100%;background:#111;border:1px solid #222;padding:14px;color:#f0f0f0;font-family:'Inter',sans-serif;font-size:16px;outline:none;transition:border-color .2s;margin-bottom:10px;border-radius:0;-webkit-appearance:none}
+input:focus{border-color:#555}
+input::placeholder{color:#333}
+.lbl{display:block;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:3px;color:#444;text-transform:uppercase;margin-bottom:6px}
+.btn{width:100%;background:#f0f0f0;color:#080808;border:none;padding:16px;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;cursor:pointer;transition:all .15s;border-radius:0;flex-shrink:0}
+.btn:hover{background:#fff}
+.btn:active{transform:scale(.98);opacity:.8}
+.btn:disabled{opacity:.25;cursor:not-allowed;transform:none}
+.btn-outline{width:100%;background:transparent;color:#666;border:1px solid #222;padding:14px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;cursor:pointer;transition:all .15s;margin-top:8px;border-radius:0;flex-shrink:0}
+.btn-outline:hover{border-color:#444;color:#f0f0f0}
+.err{font-family:'JetBrains Mono',monospace;font-size:11px;color:#f55;letter-spacing:1px;margin-top:8px;text-align:center;display:none;padding:8px}
+.divr{display:flex;align-items:center;gap:10px;margin:12px 0}
+.divr-l{flex:1;height:1px;background:#1a1a1a}
+.divr-t{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;color:#333;text-transform:uppercase}
+.toggle-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.toggle-btn{background:#0e0e0e;border:1px solid #1a1a1a;padding:14px 10px;cursor:pointer;transition:all .15s;text-align:center;border-radius:0}
+.toggle-btn:hover{border-color:#333}
+.toggle-btn.on{border-color:#f0f0f0;background:#f0f0f0;color:#080808}
+.toggle-btn-icon{font-size:18px;margin-bottom:4px}
+.toggle-btn-label{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px}
+.toggle-btn-desc{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;color:#555;line-height:1.5;margin-top:2px}
+.toggle-btn.on .toggle-btn-desc{color:#555}
+.edition-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.ed-btn{background:#0e0e0e;border:1px solid #1a1a1a;padding:10px 6px;cursor:pointer;transition:all .15s;text-align:center;border-radius:0}
+.ed-btn:hover{border-color:#333}
+.ed-btn.on{border-color:#f0f0f0;background:#f0f0f0;color:#080808}
+.ed-btn-icon{font-size:16px;margin-bottom:3px}
+.ed-btn-name{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#555;line-height:1.2}
+.ed-btn.on .ed-btn-name{color:#555}
+.count-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.cnt-btn{background:#0e0e0e;border:1px solid #1a1a1a;color:#555;padding:12px 4px;font-family:'Bebas Neue',sans-serif;font-size:20px;cursor:pointer;transition:all .15s;border-radius:0;text-align:center}
+.cnt-btn:hover{border-color:#333;color:#f0f0f0}
+.cnt-btn.on{background:#f0f0f0;color:#080808;border-color:#f0f0f0}
+.code-display{font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,12vw,72px);letter-spacing:12px;text-align:center;padding:16px 0;color:#f0f0f0}
+.p-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#0e0e0e;border:1px solid #1a1a1a;margin-bottom:6px;font-size:14px;font-weight:500}
+.pdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.host-tag{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;color:#777;border:1px solid #222;padding:2px 6px;text-transform:uppercase}
+.lobby-info{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#555;text-align:center;padding:8px 0;text-transform:uppercase}
+.role-card{background:#0e0e0e;border:1px solid #222;padding:24px 20px;margin:12px 0;text-align:center;position:relative}
+.role-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:#333}
+.role-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,12vw,72px);letter-spacing:4px;line-height:1}
+.role-word{font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,5vw,32px);letter-spacing:3px;margin-top:8px;color:#bbb}
+.role-hint{font-family:'JetBrains Mono',monospace;font-size:11px;color:#444;margin-top:10px;letter-spacing:1px;line-height:1.7;white-space:pre-line}
+.color-badge{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:#444;text-transform:uppercase}
+.color-dot{width:10px;height:10px;border-radius:50%}
+.draw-header{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#0e0e0e;border-bottom:1px solid #1a1a1a;flex-shrink:0}
+.round-badge{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;padding:4px 10px;border:1px solid #1e1e1e;color:#555;white-space:nowrap}
+.turn-badge{font-family:'Bebas Neue',sans-serif;font-size:clamp(13px,3.5vw,18px);letter-spacing:2px;padding:4px 10px;border:1px solid #1e1e1e;flex:1;text-align:center;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.turn-badge.yours{border-color:#f0f0f0;background:#f0f0f0;color:#080808}
+.word-bar-row{display:flex;align-items:center;padding:6px 14px;background:#0a0a0a;border-bottom:1px solid #161616;flex-shrink:0;gap:8px}
+.word-bar{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#444;flex:1}
+.word-bar b{color:#f0f0f0;font-size:13px;letter-spacing:3px}
+.skip-btn{background:transparent;border:1px solid #2a2a2a;color:#555;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:5px 10px;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.skip-btn:hover{border-color:#555;color:#f0f0f0}
+.skip-btn.voted{border-color:#f0f0f0;color:#f0f0f0}
+.canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:6px;background:#080808;overflow:hidden;min-height:0}
+#cvs{background:#fff;touch-action:none;display:block;max-width:100%;max-height:100%;border:1px solid #1a1a1a}
 
-        .reveal { opacity: 0; transform: translateY(30px); }
+/* LEGEND with toggle */
+.legend-row{display:flex;align-items:center;background:#0e0e0e;border-top:1px solid #161616;flex-shrink:0}
+.legend-bar{display:flex;gap:5px;overflow-x:auto;padding:6px 10px;flex:1;scrollbar-width:none;flex-wrap:nowrap}
+.legend-bar::-webkit-scrollbar{display:none}
+.leg{display:flex;align-items:center;gap:4px;padding:3px 8px;border:1px solid #161616;font-size:10px;font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0;color:#555}
+.leg.cur{border-color:#f0f0f0;background:#f0f0f0;color:#080808}
+.leg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.leg.cur .leg-dot{border:1px solid rgba(0,0,0,.2)}
+.who-toggle-btn{background:transparent;border:none;border-left:1px solid #161616;color:#555;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:6px 10px;cursor:pointer;transition:all .15s;flex-shrink:0;white-space:nowrap}
+.who-toggle-btn.on{color:#f0f0f0}
+.who-toggle-btn:hover{color:#f0f0f0}
 
-        .card { 
-            background: #0a0a0a; 
-            border: 1px solid rgba(255,255,255,0.05); 
-            transition: border-color 0.4s ease, box-shadow 0.4s ease;
-            transform-style: preserve-3d;
-            perspective: 1000px;
-        }
-        
-        .card:hover { 
-            border-color: #ff00ff; 
-            box-shadow: 0 0 40px rgba(191, 0, 255, 0.25); 
-        }
+/* WHO OVERLAY */
+.who-overlay{position:absolute;inset:0;background:rgba(8,8,8,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
+.who-overlay.on{opacity:1;pointer-events:auto}
+.who-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#0e0e0e;border:1px solid #1a1a1a;width:100%;max-width:300px;font-size:13px;font-weight:500}
 
-        .social-btn { 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            border: 1px solid rgba(255,255,255,0.1); 
-        }
-        
-        .social-btn:hover { 
-            background: linear-gradient(90deg, #ff00ff, #bf00ff);
-            color: white; 
-            transform: scale(1.1) translateY(-3px); 
-            border-color: #ff00ff;
-        }
+/* COLOR PICKER */
+.color-picker-row{display:flex;align-items:center;gap:6px;padding:5px 10px;background:#0e0e0e;border-top:1px solid #1a1a1a;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.color-picker-row::-webkit-scrollbar{display:none}
+.cpick{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;flex-shrink:0;transition:transform .15s}
+.cpick:hover{transform:scale(1.2)}
+.cpick.on{border-color:#fff;transform:scale(1.15)}
+.cpick-custom{width:22px;height:22px;border-radius:50%;border:1px dashed #444;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#555;transition:all .15s;background:#111;position:relative;overflow:hidden}
+.cpick-custom:hover{border-color:#888}
+.cpick-custom input[type=color]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 
-        .glow {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at var(--x) var(--y), rgba(191, 0, 255, 0.1) 0%, transparent 40%);
-            z-index: -1; pointer-events: none;
-        }
-
-        /* FIX: Added padding-right and padding-left so italics don't cut */
-        .text-neon {
-            background: linear-gradient(90deg, #ff00ff, #bf00ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: inline-block;
-            padding-right: 20px; 
-            margin-right: -20px;
-        }
-
-
-        /* FIX: Added horizontal padding to the title container */
-        .hero-title {
-            font-size: clamp(3rem, 12vw, 8.5rem);
-            line-height: 0.9;
-            padding-left: 5px;
-            padding-right: 25px;
-            width: fit-content;
-        }
-    </style>
+.tool-bar{display:flex;align-items:center;gap:6px;padding:7px 10px;background:#0e0e0e;border-top:1px solid #1a1a1a;flex-shrink:0;justify-content:space-between}
+.sz-btn{background:#111;border:1px solid #1e1e1e;color:#444;padding:7px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;transition:all .15s;border-radius:0}
+.sz-btn.on{background:#f0f0f0;color:#080808;border-color:#f0f0f0}
+.undo-btn{background:transparent;border:1px solid #2a2a2a;color:#555;padding:7px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .15s;border-radius:0}
+.undo-btn:disabled{opacity:.2;cursor:not-allowed}
+.done-btn{background:#f0f0f0;color:#080808;border:none;padding:7px 18px;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:3px;cursor:pointer;transition:all .15s;border-radius:0}
+.done-btn:disabled{opacity:.2;cursor:not-allowed}
+.word-screen-header{padding:8px 14px;background:#0e0e0e;border-bottom:1px solid #1a1a1a;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.edition-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:#444;text-transform:uppercase;padding:3px 8px;border:1px solid #1a1a1a}
+.clue-box{padding:10px 14px;background:#0a0a0a;border-bottom:1px solid #161616;flex-shrink:0}
+.clue-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;color:#333;text-transform:uppercase;margin-bottom:4px}
+.clue-text{font-size:14px;color:#bbb;line-height:1.5}
+.guesses-area{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:5px;min-height:0}
+.guesses-area::-webkit-scrollbar{display:none}
+.g-row{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#0e0e0e;border:1px solid #1a1a1a;font-size:13px}
+.g-row.correct{border-color:#2ecc71;background:rgba(46,204,113,.05)}
+.g-row.wrong{opacity:.5}
+.g-pname{font-weight:600;flex-shrink:0;font-size:12px}
+.g-text{flex:1;color:#bbb;font-style:italic;font-size:13px}
+.g-text.ok{color:#2ecc71;font-style:normal;font-weight:600}
+.g-badge{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border:1px solid;margin-left:auto;flex-shrink:0}
+.g-badge.correct{color:#2ecc71;border-color:#2ecc71}
+.g-badge.wrong{color:#444;border-color:#333}
+.g-badge.imp{color:#e74c3c;border-color:#e74c3c}
+.guess-bar{display:flex;gap:8px;padding:8px 10px;background:#0e0e0e;border-top:1px solid #1a1a1a;flex-shrink:0}
+.guess-bar input[type=text]{margin-bottom:0;flex:1;padding:11px 12px;font-size:14px}
+.guess-bar-btn{background:#f0f0f0;color:#080808;border:none;padding:11px 16px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;white-space:nowrap;border-radius:0;flex-shrink:0}
+.guess-bar-btn:disabled{opacity:.3;cursor:not-allowed}
+.waiting-txt{padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:#444;text-transform:uppercase;text-align:center;border-top:1px solid #1a1a1a;flex-shrink:0}
+.vote-list-wrap{flex:1;overflow-y:auto;padding:12px 14px;min-height:0}
+.vote-list-wrap::-webkit-scrollbar{display:none}
+.v-card{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#0e0e0e;border:1px solid #1a1a1a;margin-bottom:7px;cursor:pointer;transition:all .2s;font-size:14px;font-weight:500}
+.v-card:hover{border-color:#333;background:#111}
+.v-card.picked{border-color:#f0f0f0;background:#f0f0f0;color:#080808}
+.v-card.locked{pointer-events:none}
+.v-num{margin-left:auto;font-family:'Bebas Neue',sans-serif;font-size:24px}
+.v-status{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:#444;text-transform:uppercase;text-align:center;padding:10px 14px;flex-shrink:0;border-top:1px solid #1a1a1a}
+.res-wrap{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+.res-wrap::-webkit-scrollbar{display:none}
+.res-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,12vw,72px);letter-spacing:4px;line-height:1}
+.res-sub{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:#444;text-transform:uppercase}
+.res-detail{background:#0e0e0e;border:1px solid #1a1a1a;padding:16px;font-size:14px;line-height:1.8;text-align:left;width:100%}
+.res-word-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;color:#444;text-transform:uppercase}
+.res-word{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,9vw,52px);letter-spacing:4px}
+.res-btns{width:100%;display:flex;flex-direction:column;gap:8px;padding-bottom:16px}
+.load-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+.load-bar-wrap{width:100%;max-width:300px;height:1px;background:#1a1a1a;margin:20px 0;overflow:hidden}
+.load-bar{height:100%;background:#f0f0f0;animation:ls 1.4s ease-in-out infinite}
+@keyframes ls{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}}
+.caught-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px}
+</style>
 </head>
 <body>
 
-    <div id="cursor-outline"></div>
-    <div class="glow"></div>
+<!-- HOME -->
+<div id="sc-home" class="sc on">
+  <div class="topbar"><div class="topbar-title">GUESS THE IMPOSTER</div></div>
+  <div class="inner">
+    <div class="lbl" style="margin-top:4px">game mode</div>
+    <div class="toggle-row">
+      <div class="toggle-btn on" id="gm-draw" onclick="selGM('draw')">
+        <div class="toggle-btn-icon">✏️</div>
+        <div class="toggle-btn-label">DRAW</div>
+        <div class="toggle-btn-desc">Draw the word</div>
+      </div>
+      <div class="toggle-btn" id="gm-word" onclick="selGM('word')">
+        <div class="toggle-btn-icon">💬</div>
+        <div class="toggle-btn-label">WORD</div>
+        <div class="toggle-btn-desc">Guess the word</div>
+      </div>
+    </div>
+    <div class="lbl">edition</div>
+    <div class="edition-grid" id="ed-grid"></div>
+    <div class="lbl">username</div>
+    <input id="h-u" placeholder="Your name..." maxlength="16" autocomplete="off">
+    <div class="lbl">max players</div>
+    <div class="count-grid" id="cnt-grid"></div>
+    <button class="btn" onclick="doCreate()">CREATE ROOM</button>
+    <div class="divr"><div class="divr-l"></div><div class="divr-t">or join</div><div class="divr-l"></div></div>
+    <div class="lbl">room code</div>
+    <input id="h-code" placeholder="5-letter code..." maxlength="5" style="text-transform:uppercase;letter-spacing:5px" autocomplete="off">
+    <button class="btn-outline" onclick="doJoin()">JOIN ROOM</button>
+    <div class="err" id="h-err"></div>
+    <div style="height:16px"></div>
+  </div>
+</div>
 
-    <nav class="max-w-6xl mx-auto px-6 py-10 flex justify-between items-center">
-        <div class="flex items-center gap-4">
-            <img src="RXDevPFP.png" class="w-12 h-12 rounded-full border-2 border-[#ff00ff] shadow-[0_0_15px_rgba(255,0,255,0.5)]">
-            <h1 class="text-3xl font-black italic tracking-tighter pr-4">RX<span class="text-neon">DEV</span></h1>
-        </div>
-        <div class="text-[10px] font-bold text-gray-500 tracking-[0.3em] uppercase">UI Designer</div>
-    </nav>
+<!-- LOADING -->
+<div id="sc-load" class="sc">
+  <div class="topbar">
+    <div class="topbar-title">CONNECTING</div>
+    <button class="back-btn" onclick="go('sc-home')">CANCEL</button>
+  </div>
+  <div class="load-wrap">
+    <div class="title" style="font-size:clamp(32px,8vw,48px);letter-spacing:4px;margin-bottom:8px">WAKING UP<br>SERVER...</div>
+    <div class="mono dim" style="font-size:10px;letter-spacing:2px;text-transform:uppercase">may take 30+ seconds</div>
+    <div class="load-bar-wrap"><div class="load-bar"></div></div>
+    <div class="mono" style="font-size:10px;letter-spacing:3px;color:#444;text-transform:uppercase" id="load-st">connecting...</div>
+  </div>
+</div>
 
-    <main class="max-w-6xl mx-auto px-6">
-        
-        <header class="py-16 md:py-24">
-            <h1 id="hero-text" class="hero-title font-black italic uppercase tracking-tighter pr-10">
-                Roblox <br> <span class="text-neon">Developer</span>
-            </h1>
-            
-            <div class="mt-12 flex flex-wrap gap-4 reveal">
-                <a href="https://x.com/rxdev_yt_" target="_blank" class="social-btn px-6 py-3 rounded-xl font-bold text-sm uppercase italic">Twitter / X</a>
-                <a href="https://www.youtube.com/@RXDev_Studio" target="_blank" class="social-btn px-6 py-3 rounded-xl font-bold text-sm uppercase italic">YouTube</a>
-                <a href="https://www.roblox.com/users/2043222762/profile" target="_blank" class="social-btn px-6 py-3 rounded-xl font-bold text-sm uppercase italic">Roblox</a>
-                <div class="px-6 py-3 rounded-xl font-bold text-sm uppercase italic bg-purple-600/10 border border-purple-500/30 text-pink-400">Discord: rxdev_yt</div>
-            </div>
-        </header>
+<!-- LOBBY -->
+<div id="sc-lobby" class="sc">
+  <div class="topbar">
+    <div class="topbar-title">LOBBY</div>
+    <button class="back-btn" onclick="leaveRoom()">LEAVE</button>
+  </div>
+  <div class="inner">
+    <div class="mono dim" style="font-size:9px;letter-spacing:3px;text-transform:uppercase;text-align:center;margin-top:4px">room code</div>
+    <div class="code-display" id="lob-code">XXXXX</div>
+    <div class="lobby-info" id="lob-need"></div>
+    <div class="lbl">players (<span id="lob-cn">0</span>/<span id="lob-mx">?</span>)</div>
+    <div id="lob-list" style="margin-bottom:16px"></div>
+    <div id="lob-sw"><button class="btn" onclick="doStart()">START GAME</button></div>
+    <div class="mono dim" style="font-size:10px;letter-spacing:2px;text-transform:uppercase;text-align:center;margin-top:12px;display:none" id="lob-w">waiting for host...</div>
+    <div class="err" id="lob-err"></div>
+  </div>
+</div>
 
-        <section class="mb-32">
-            <h3 class="text-xs font-bold tracking-[0.4em] text-gray-500 uppercase mb-8 reveal italic">Featured Thumbnails</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="card rounded-[2rem] overflow-hidden reveal hover-tilt">
-                    <img src="EarnsOffline.png" class="w-full aspect-video object-cover">
-                </div>
-                <div class="card rounded-[2rem] overflow-hidden reveal hover-tilt">
-                    <img src="farmer.png" class="w-full aspect-video object-cover">
-                </div>
-                <div class="card rounded-[2rem] overflow-hidden reveal hover-tilt">
-                    <img src="idk (1).png" class="w-full aspect-video object-cover">
-                </div>
-            </div>
-        </section>
+<!-- ROLE -->
+<div id="sc-role" class="sc">
+  <div class="topbar"><div class="topbar-title">YOUR ROLE</div></div>
+  <div class="inner" style="display:flex;flex-direction:column;justify-content:center">
+    <div class="role-card">
+      <div class="role-name" id="rn">PLAYER</div>
+      <div class="role-word" id="rw"></div>
+      <div class="role-hint" id="rt"></div>
+      <div class="color-badge"><div class="color-dot" id="rcd"></div><span>your color</span></div>
+    </div>
+    <button class="btn" onclick="readyUp()" style="margin-top:12px">I'M READY</button>
+  </div>
+</div>
 
-        <section class="mb-32">
-            <h3 class="text-xs font-bold tracking-[0.4em] text-gray-500 uppercase mb-8 reveal italic text-right">GFX Profile Pictures</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 reveal">
-                <div class="card rounded-3xl aspect-square overflow-hidden hover-tilt"><img src="GFX-Girl.png" class="w-full h-full object-cover"></div>
-                <div class="card rounded-2xl aspect-square overflow-hidden hover-tilt"><img src="image_75 (5).png" class="w-full h-full object-cover"></div>
-                <div class="card rounded-3xl aspect-square overflow-hidden hover-tilt"><img src="Fan1 (13).png" class="w-full h-full object-cover"></div>
-                <div class="card rounded-3xl aspect-square overflow-hidden hover-tilt"><img src="Fan1 (9).png" class="w-full h-full object-cover"></div>
-            </div>
-        </section>
+<!-- DRAW -->
+<div id="sc-draw" class="sc" style="position:relative">
+  <div class="draw-header">
+    <div class="round-badge">R<span id="dr">1</span>/<span id="dt">5</span></div>
+    <div class="turn-badge" id="dtp">...</div>
+  </div>
+  <div class="word-bar-row">
+    <div class="word-bar" id="dw"></div>
+    <button class="skip-btn" id="skip-btn" onclick="voteSkip()">SKIP TO VOTE <span id="skip-count"></span></button>
+  </div>
+  <div class="canvas-wrap" id="ca"><canvas id="cvs" width="600" height="450"></canvas></div>
+  <div class="legend-row">
+    <div class="legend-bar" id="leg"></div>
+    <button class="who-toggle-btn" id="who-toggle" onclick="toggleWho()">WHO DREW</button>
+  </div>
+  <div class="color-picker-row" id="cprow"></div>
+  <div class="tool-bar">
+    <div style="display:flex;gap:5px" id="sbar"></div>
+    <div style="display:flex;gap:6px">
+      <button class="undo-btn" id="undo-btn" onclick="clearStroke()" disabled>UNDO</button>
+      <button class="done-btn" id="done-btn" onclick="doneStroke()" disabled>DONE →</button>
+    </div>
+  </div>
+  <!-- WHO OVERLAY -->
+  <div class="who-overlay" id="who-overlay"></div>
+</div>
 
-    </main>
+<!-- WORD GAME -->
+<div id="sc-word" class="sc">
+  <div class="word-screen-header">
+    <div class="round-badge">R<span id="wr">1</span>/<span id="wt">5</span></div>
+    <div class="turn-badge" id="wtp">...</div>
+    <div class="edition-tag" id="w-ed"></div>
+  </div>
+  <div class="clue-box">
+    <div class="clue-label">clue</div>
+    <div class="clue-text" id="w-clue">...</div>
+  </div>
+  <div class="guesses-area" id="w-guesses"></div>
+  <div id="w-inp-area" class="guess-bar" style="display:none">
+    <input type="text" id="w-inp" placeholder="Your guess..." autocomplete="off" maxlength="40" onkeydown="if(event.key==='Enter')subWordGuess()">
+    <button class="guess-bar-btn" onclick="subWordGuess()">GUESS</button>
+  </div>
+  <div id="w-wait" class="waiting-txt" style="display:none">waiting for others...</div>
+</div>
 
-    <script>
-        const outline = document.getElementById('cursor-outline');
+<!-- VOTE -->
+<div id="sc-vote" class="sc">
+  <div class="topbar"><div class="topbar-title" style="font-size:clamp(14px,4vw,18px)">WHO IS THE IMPOSTER?</div></div>
+  <div class="vote-list-wrap" id="vlist"></div>
+  <div class="v-status" id="vst"></div>
+</div>
 
-        window.addEventListener('mousemove', (e) => {
-            gsap.to(outline, { x: e.clientX - 17, y: e.clientY - 17, duration: 0.6, ease: "power3.out" });
-            document.body.style.setProperty('--x', e.clientX + 'px');
-            document.body.style.setProperty('--y', e.clientY + 'px');
-        });
+<!-- CAUGHT -->
+<div id="sc-guess" class="sc">
+  <div class="topbar"><div class="topbar-title">CAUGHT!</div></div>
+  <div class="caught-wrap" id="gi">
+    <div class="title" style="font-size:clamp(36px,9vw,52px);letter-spacing:4px;line-height:0.9">YOU WERE<br><span style="color:#555">CAUGHT!</span></div>
+    <div class="mono dim" style="font-size:11px;letter-spacing:1px;line-height:1.8">Guess the secret word to still win!</div>
+    <div style="width:100%">
+      <div class="lbl">what was the word?</div>
+      <input id="g-inp" placeholder="Your guess..." autocomplete="off">
+      <button class="btn" onclick="sendGuess()">SUBMIT GUESS</button>
+    </div>
+  </div>
+</div>
 
-        document.querySelectorAll('.hover-tilt').forEach(card => {
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const xc = rect.width / 2;
-                const yc = rect.height / 2;
-                const dx = x - xc;
-                const dy = y - yc;
+<!-- RESULTS -->
+<div id="sc-res" class="sc">
+  <div class="topbar"><div class="topbar-title">RESULTS</div></div>
+  <div class="res-wrap">
+    <div class="res-title" id="res-t">PLAYERS WIN</div>
+    <div class="res-sub" id="res-s"></div>
+    <div class="res-detail" id="res-d"></div>
+    <div class="res-word-lbl">the secret word was</div>
+    <div class="res-word" id="res-w"></div>
+    <div class="res-btns">
+      <button class="btn" id="res-again" style="display:none" onclick="playAgain()">PLAY AGAIN</button>
+      <button class="btn-outline" onclick="goHome()">BACK TO HOME</button>
+    </div>
+  </div>
+</div>
 
-                gsap.to(card, {
-                    rotationY: dx / 10,
-                    rotationX: -dy / 10,
-                    ease: "power3.out",
-                    duration: 0.5
-                });
-            });
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script>
+const RENDER='https://guessgame-39or.onrender.com';
+const PC=['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#e91e63','#00bcd4','#cddc39'];
+const ALL_COLORS=['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#e91e63','#00bcd4','#cddc39','#ffffff','#888888','#ff69b4','#ff8c00','#7fff00'];
+const SIZES=[{l:'XS',s:2},{l:'S',s:5},{l:'M',s:10},{l:'L',s:18},{l:'XL',s:30}];
+const EDITIONS={
+  roblox:{name:'Roblox',icon:'🟥',words:[
+    {word:'Adopt Me',clue:'Popular game where you raise and trade virtual pets'},
+    {word:'Brookhaven',clue:'Roleplay game where you live in a town and own homes'},
+    {word:'Jailbreak',clue:'Cops vs robbers open world game with heists'},
+    {word:'Tower of Hell',clue:'Obby game with no checkpoints that gets harder'},
+    {word:'Arsenal',clue:'FPS game where you cycle through all weapons to win'},
+    {word:'Piggy',clue:'Horror game based on Peppa Pig where you escape a monster'},
+    {word:'Bedwars',clue:'Protect your bed while destroying others in this team game'},
+    {word:'Murder Mystery 2',clue:'One murderer, one sheriff, everyone else is innocent'},
+    {word:'Blox Fruits',clue:'One Piece inspired game with devil fruits and fighting'},
+    {word:'Pet Simulator',clue:'Collect and upgrade pets to earn coins and gems'}
+  ]},
+  clashroyale:{name:'Clash Royale',icon:'👑',words:[
+    {word:'Goblin Barrel',clue:'A barrel thrown that releases goblins at the tower'},
+    {word:'Hog Rider',clue:'A muscular man riding a hog that charges at towers'},
+    {word:'Skeleton Army',clue:'A huge mob of skeletons that swarms enemies'},
+    {word:'Fireball',clue:'A ball of fire that deals area damage'},
+    {word:'Witch',clue:'A flying unit that spawns skeletons'},
+    {word:'PEKKA',clue:'Giant armored robot with huge swords'},
+    {word:'Electro Wizard',clue:'A wizard who shoots lightning at multiple units'},
+    {word:'Lava Hound',clue:'A giant flying dog that splits into smaller ones'},
+    {word:'Mega Knight',clue:'A giant knight that jumps and deals damage on landing'},
+    {word:'Royal Ghost',clue:'An invisible swordsman that appears only when attacking'}
+  ]},
+  brawlstars:{name:'Brawl Stars',icon:'⭐',words:[
+    {word:'Shelly',clue:'Default brawler that shoots a wide shotgun blast'},
+    {word:'Spike',clue:'Cactus brawler that throws needles in a star pattern'},
+    {word:'Leon',clue:'Brawler who can turn invisible with his super'},
+    {word:'Crow',clue:'Fast brawler who throws poison daggers'},
+    {word:'Frank',clue:'Slow brawler with a huge hammer that stuns on super'},
+    {word:'Piper',clue:'Long range brawler that deals more damage from far away'},
+    {word:'Mortis',clue:'Brawler who dashes with a shovel to deal damage'},
+    {word:'El Primo',clue:'Wrestler brawler who punches and jumps on enemies'},
+    {word:'Sandy',clue:'Legendary who puts enemies to sleep with sandstorms'},
+    {word:'Brock',clue:'Brawler who shoots rockets with long range'}
+  ]},
+  celebrity:{name:'Celebrity',icon:'🌟',words:[
+    {word:'Elon Musk',clue:'Tech billionaire who owns Tesla, SpaceX and X'},
+    {word:'MrBeast',clue:'Most subscribed YouTuber known for expensive challenges'},
+    {word:'Cristiano Ronaldo',clue:'Portuguese football star known for his goal celebrations'},
+    {word:'Taylor Swift',clue:'Pop star known for writing songs about her relationships'},
+    {word:'Lionel Messi',clue:'Argentine football legend with multiple Ballon dOr awards'},
+    {word:'Pewdiepie',clue:'Swedish YouTuber who was number one subscribed for years'},
+    {word:'Drake',clue:'Canadian rapper known for hits like Gods Plan'},
+    {word:'Kylie Jenner',clue:'Reality TV star turned cosmetics billionaire'},
+    {word:'KSI',clue:'British YouTuber turned boxer and musician'},
+    {word:'Ronaldo R9',clue:'Brazilian considered one of the best footballers ever'}
+  ]},
+  general:{name:'General',icon:'🎲',words:[
+    {word:'Eiffel Tower',clue:'Famous iron lattice tower built in Paris in 1889'},
+    {word:'Pizza',clue:'Italian dish with dough sauce and cheese baked in oven'},
+    {word:'Shark',clue:'Large predatory fish with multiple rows of teeth'},
+    {word:'Astronaut',clue:'Person trained to travel and work in outer space'},
+    {word:'Volcano',clue:'Mountain that can erupt with lava and ash'},
+    {word:'Chess',clue:'Strategy board game played with 16 pieces per side'},
+    {word:'Submarine',clue:'Vehicle that travels underwater for long periods'},
+    {word:'Guitar',clue:'Stringed instrument played by strumming or picking'},
+    {word:'Dinosaur',clue:'Ancient reptiles that lived millions of years ago'},
+    {word:'Rainbow',clue:'Colorful arc in the sky formed by light and rain'}
+  ]}
+};
 
-            card.addEventListener('mouseleave', () => {
-                gsap.to(card, { rotationY: 0, rotationX: 0, ease: "elastic.out(1, 0.3)", duration: 1.5 });
-            });
-        });
+function rnd(a){return a[Math.floor(Math.random()*a.length)];}
+function go(id){document.querySelectorAll('.sc').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
+function showErr(id,m){const e=document.getElementById(id);e.textContent=m;e.style.display='block';setTimeout(()=>e.style.display='none',5000);}
 
-        gsap.to(".reveal", { opacity: 1, y: 0, duration: 1.5, stagger: 0.15, ease: "expo.out", delay: 0.5 });
+let socket=null,gameMode='draw',selEd='roblox';
+let me=null,room=null,isHost=false,isImp=false;
+let myColor=null,myTurn=false,voted=false,ready=false;
+let brushSz=10,brushColor=null,drawing=false,hasStroke=false,allPlayers=[],colorMap={};
+let maxP=4,pending=null,snap=null,wGuesses=[];
+let currentWord=null,whoVisible=false,skipVoted=false;
 
-        gsap.from("#hero-text", { y: 50, opacity: 0, duration: 1.8, ease: "power4.out", delay: 0.2 });
+const cvs=document.getElementById('cvs');
+const ctx=cvs.getContext('2d');
 
-        gsap.to(".hover-tilt", {
-            y: "-=10", duration: 2, ease: "sine.inOut", repeat: -1, yoyo: true, 
-            stagger: { each: 0.2, from: "random" }
-        });
-    </script>
+window.addEventListener('DOMContentLoaded',()=>{
+  const eg=document.getElementById('ed-grid');
+  Object.entries(EDITIONS).forEach(([k,ed])=>{
+    const b=document.createElement('div');b.className='ed-btn'+(k===selEd?' on':'');
+    b.innerHTML='<div class="ed-btn-icon">'+ed.icon+'</div><div class="ed-btn-name">'+ed.name+'</div>';
+    b.onclick=()=>{selEd=k;eg.querySelectorAll('.ed-btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');};
+    eg.appendChild(b);
+  });
+  const cg=document.getElementById('cnt-grid');
+  for(let i=3;i<=10;i++){
+    const b=document.createElement('button');b.className='cnt-btn'+(i===maxP?' on':'');b.textContent=i;
+    b.onclick=()=>{maxP=i;cg.querySelectorAll('.cnt-btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');};
+    cg.appendChild(b);
+  }
+  const sb=document.getElementById('sbar');
+  SIZES.forEach(s=>{
+    const b=document.createElement('button');b.className='sz-btn'+(s.s===brushSz?' on':'');b.textContent=s.l;
+    b.onclick=()=>{brushSz=s.s;sb.querySelectorAll('.sz-btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');};
+    sb.appendChild(b);
+  });
+});
+
+function buildColorPicker(){
+  const row=document.getElementById('cprow');row.innerHTML='';
+  ALL_COLORS.forEach(c=>{
+    const d=document.createElement('div');d.className='cpick'+(c===brushColor?' on':'');
+    d.style.background=c;
+    d.onclick=()=>{brushColor=c;row.querySelectorAll('.cpick').forEach(x=>x.classList.remove('on'));d.classList.add('on');};
+    row.appendChild(d);
+  });
+  const custom=document.createElement('div');custom.className='cpick-custom';custom.title='Custom color';
+  custom.innerHTML='＋<input type="color" value="#ffffff">';
+  custom.querySelector('input').addEventListener('input',e=>{
+    brushColor=e.target.value;
+    row.querySelectorAll('.cpick').forEach(x=>x.classList.remove('on'));
+    custom.style.background=brushColor;
+  });
+  row.appendChild(custom);
+}
+
+function selGM(m){
+  gameMode=m;
+  document.getElementById('gm-draw').classList.toggle('on',m==='draw');
+  document.getElementById('gm-word').classList.toggle('on',m==='word');
+}
+
+function doCreate(){
+  const u=document.getElementById('h-u').value.trim();
+  if(!u){showErr('h-err','Enter a username!');return;}
+  connectAndDo(()=>socket.emit('createRoom',{username:u,maxPlayers:maxP,gameMode,edition:selEd}));
+}
+
+function doJoin(){
+  const u=document.getElementById('h-u').value.trim();
+  const c=document.getElementById('h-code').value.trim().toUpperCase();
+  if(!u){showErr('h-err','Enter a username!');return;}
+  if(!c){showErr('h-err','Enter a room code!');return;}
+  connectAndDo(()=>socket.emit('joinRoom',{username:u,code:c}));
+}
+
+function leaveRoom(){if(socket)socket.disconnect();go('sc-home');}
+function doStart(){socket.emit('startGame');}
+
+function readyUp(){
+  ready=true;
+  if(gameMode==='draw'){go('sc-draw');fitC();}
+  else go('sc-word');
+}
+
+function connectAndDo(action){
+  if(socket&&socket.connected){action();return;}
+  go('sc-load');document.getElementById('load-st').textContent='connecting...';
+  pending=action;
+  socket=io(RENDER,{transports:['websocket','polling'],timeout:60000});
+  let d=0;const iv=setInterval(()=>{d=(d+1)%4;document.getElementById('load-st').textContent='connecting'+'.'.repeat(d+1);},600);
+  socket.on('connect',()=>{clearInterval(iv);document.getElementById('load-st').textContent='connected!';setTimeout(()=>{if(pending){pending();pending=null;}},300);setupSock();});
+  socket.on('connect_error',()=>document.getElementById('load-st').textContent='retrying...');
+}
+
+function doneStroke(){
+  if(!hasStroke)return;
+  snap=null;hasStroke=false;
+  document.getElementById('undo-btn').disabled=true;
+  document.getElementById('done-btn').disabled=true;
+  socket.emit('strokeEnd');
+}
+
+function clearStroke(){
+  if(!snap)return;
+  ctx.putImageData(snap,0,0);snap=null;hasStroke=false;
+  document.getElementById('undo-btn').disabled=true;
+  document.getElementById('done-btn').disabled=true;
+}
+
+function subWordGuess(){
+  const inp=document.getElementById('w-inp');const g=inp.value.trim();if(!g)return;
+  inp.value='';inp.disabled=true;
+  document.querySelector('#w-inp-area .guess-bar-btn').disabled=true;
+  socket.emit('submitWordGuess',{guess:g});
+}
+
+function sendGuess(){
+  const g=document.getElementById('g-inp').value.trim();if(!g)return;
+  document.getElementById('g-inp').disabled=true;
+  socket.emit('impostorGuess',{guess:g});
+}
+
+function playAgain(){if(socket&&isHost)socket.emit('restartGame');}
+
+function goHome(){
+  me=null;room=null;isHost=false;isImp=false;myColor=null;voted=false;
+  hasStroke=false;snap=null;wGuesses=[];allPlayers=[];currentWord=null;
+  whoVisible=false;skipVoted=false;
+  ctx.clearRect(0,0,600,450);go('sc-home');
+}
+
+function voteSkip(){
+  if(skipVoted)return;
+  skipVoted=true;
+  document.getElementById('skip-btn').classList.add('voted');
+  socket.emit('voteSkip');
+}
+
+function toggleWho(){
+  whoVisible=!whoVisible;
+  document.getElementById('who-overlay').classList.toggle('on',whoVisible);
+  document.getElementById('who-toggle').classList.toggle('on',whoVisible);
+}
+
+function buildWhoOverlay(players){
+  const ov=document.getElementById('who-overlay');
+  ov.innerHTML='<div class="mono" style="font-size:9px;letter-spacing:3px;color:#555;margin-bottom:8px;text-transform:uppercase">who drew what</div>';
+  players.forEach(p=>{
+    const d=document.createElement('div');d.className='who-item';
+    d.innerHTML='<div class="pdot" style="background:'+(colorMap[p.id]||'#fff')+'"></div><b>'+p.username+'</b>';
+    ov.appendChild(d);
+  });
+  const closeBtn=document.createElement('button');
+  closeBtn.className='btn-outline';closeBtn.style.cssText='max-width:300px;margin-top:8px';
+  closeBtn.textContent='CLOSE';closeBtn.onclick=toggleWho;
+  ov.appendChild(closeBtn);
+}
+
+function buildLeg(players){
+  colorMap={};players.forEach((p,i)=>{colorMap[p.id]=PC[i%PC.length];});
+  const el=document.getElementById('leg');el.innerHTML='';
+  players.forEach(p=>{
+    const d=document.createElement('div');d.className='leg';d.id='lg'+p.id;
+    d.innerHTML='<div class="leg-dot" style="background:'+colorMap[p.id]+'"></div>'+p.username;
+    el.appendChild(d);
+  });
+  buildWhoOverlay(players);
+}
+
+function updDTurn(cp,round,total){
+  myTurn=cp.id===socket.id;
+  skipVoted=false;
+  document.getElementById('skip-btn').classList.remove('voted');
+  const tp=document.getElementById('dtp');
+  tp.textContent=myTurn?'YOUR TURN':cp.username+"'s turn";
+  tp.className='turn-badge'+(myTurn?' yours':'');
+  document.getElementById('dr').textContent=round+1;
+  document.getElementById('dt').textContent=total;
+  cvs.style.pointerEvents=myTurn?'auto':'none';
+  if(myTurn){hasStroke=false;snap=null;document.getElementById('undo-btn').disabled=true;document.getElementById('done-btn').disabled=true;}
+  document.querySelectorAll('#leg .leg').forEach(e=>e.classList.remove('cur'));
+  const le=document.getElementById('lg'+cp.id);if(le)le.classList.add('cur');
+  const dw=document.getElementById('dw');
+  if(myTurn && !isImp) dw.innerHTML='draw: <b>'+currentWord+'</b>';
+  else if(!isImp && !myTurn) dw.innerHTML='draw: <b style="color:#555">???</b>';
+}
+
+function updWTurn(cp,round,total){
+  myTurn=cp.id===socket.id;
+  const tp=document.getElementById('wtp');
+  tp.textContent=myTurn?'YOUR TURN':cp.username+"'s turn";
+  tp.className='turn-badge'+(myTurn?' yours':'');
+  document.getElementById('wr').textContent=round+1;
+  document.getElementById('wt').textContent=total;
+  const ia=document.getElementById('w-inp-area');
+  const ww=document.getElementById('w-wait');
+  if(myTurn){ia.style.display='flex';ww.style.display='none';const inp=document.getElementById('w-inp');inp.disabled=false;inp.value='';document.querySelector('#w-inp-area .guess-bar-btn').disabled=false;}
+  else{ia.style.display='none';ww.style.display='block';}
+}
+
+function rnLob(players,mp){
+  const list=document.getElementById('lob-list');list.innerHTML='';
+  players.forEach((p,i)=>{
+    const el=document.createElement('div');el.className='p-row';
+    el.innerHTML='<div class="pdot" style="background:'+PC[i%PC.length]+'"></div>'+p.username+(p.isHost?'<div class="host-tag">host</div>':'');
+    list.appendChild(el);
+  });
+  document.getElementById('lob-cn').textContent=players.length;
+  document.getElementById('lob-mx').textContent=mp||'?';
+  const need=(mp||3)-players.length;
+  document.getElementById('lob-need').textContent=need>0?'need '+need+' more player'+(need>1?'s':''):'ready to start!';
+}
+
+function rnVotes(players,votes){
+  const list=document.getElementById('vlist');list.innerHTML='';
+  const tally={};Object.values(votes).forEach(id=>{tally[id]=(tally[id]||0)+1;});
+  players.forEach(p=>{
+    if(p.id===socket.id)return;
+    const d=document.createElement('div');
+    const mv=votes[socket.id];
+    d.className='v-card'+(mv===p.id?' picked':'')+(voted?' locked':'');
+    d.innerHTML='<div class="pdot" style="background:'+(colorMap[p.id]||'#fff')+'"></div>'+p.username+'<div class="v-num">'+(tally[p.id]||0)+'</div>';
+    if(!voted)d.onclick=()=>{voted=true;socket.emit('submitVote',{votedId:p.id});};
+    list.appendChild(d);
+  });
+  document.getElementById('vst').textContent=Object.keys(votes).length+' / '+players.length+' voted';
+}
+
+function rnGuesses(guesses,players){
+  const el=document.getElementById('w-guesses');el.innerHTML='';
+  guesses.forEach(g=>{
+    const p=players.find(x=>x.id===g.playerId)||{username:'?'};
+    const d=document.createElement('div');
+    d.className='g-row'+(g.correct?' correct':' wrong');
+    d.innerHTML='<div class="pdot" style="background:'+(colorMap[g.playerId]||'#fff')+'"></div><div class="g-pname">'+p.username+'</div><div class="g-text '+(g.correct?'ok':'')+'">'+g.text+'</div><div class="g-badge '+(g.isImposter?'imp':g.correct?'correct':'wrong')+'">'+(g.isImposter?'IMP':g.correct?'✓':'✗')+'</div>';
+    el.appendChild(d);
+  });
+  el.scrollTop=el.scrollHeight;
+}
+
+function showRes(iw,imp,word,guess,reason){
+  const t=document.getElementById('res-t');
+  t.textContent=iw?'IMPOSTER WINS':'PLAYERS WIN';t.style.color=iw?'#555':'#f0f0f0';
+  const s=document.getElementById('res-s');const d=document.getElementById('res-d');
+  if(reason==='evaded'){s.textContent='THE IMPOSTER BLENDED IN PERFECTLY';d.innerHTML='<b>'+imp.username+'</b> was the imposter and was never caught.';}
+  else if(reason==='guessed'){s.textContent='CAUGHT — BUT GUESSED THE WORD!';d.innerHTML='<b>'+imp.username+'</b> was caught but correctly guessed <b>"'+guess+'"</b>.';}
+  else{s.textContent='IMPOSTER CAUGHT AND FAILED!';d.innerHTML='<b>'+imp.username+'</b> guessed <b>"'+(guess||'?')+'"</b> — wrong!';}
+  document.getElementById('res-w').textContent=word;
+  document.getElementById('res-again').style.display=isHost?'block':'none';
+  go('sc-res');
+}
+
+function setupSock(){
+  if(socket._sx)return;socket._sx=true;
+
+  socket.on('roomCreated',({code,player,players,maxPlayers,gameMode:gm,edition:ed})=>{
+    me=player;room=code;isHost=true;gameMode=gm;selEd=ed;
+    document.getElementById('lob-code').textContent=code;
+    document.getElementById('lob-sw').style.display='block';
+    document.getElementById('lob-w').style.display='none';
+    rnLob(players,maxPlayers);go('sc-lobby');
+  });
+
+  socket.on('roomJoined',({code,player,players,maxPlayers,gameMode:gm,edition:ed})=>{
+    me=player;room=code;isHost=false;gameMode=gm;selEd=ed;
+    document.getElementById('lob-code').textContent=code;
+    document.getElementById('lob-sw').style.display='none';
+    document.getElementById('lob-w').style.display='block';
+    rnLob(players,maxPlayers);go('sc-lobby');
+  });
+
+  socket.on('playerJoined',({players,maxPlayers})=>rnLob(players,maxPlayers));
+  socket.on('playerLeft',({players,maxPlayers})=>rnLob(players,maxPlayers));
+
+  socket.on('gameStarted',({isImpostor:imp,word,hint,players,round,totalRounds,currentPlayer,gameMode:gm,edition:ed})=>{
+    isImp=imp;voted=false;ready=false;allPlayers=players;gameMode=gm;selEd=ed;
+    currentWord=imp?null:word;whoVisible=false;skipVoted=false;
+    ctx.clearRect(0,0,600,450);snap=null;hasStroke=false;wGuesses=[];
+    buildLeg(players);myColor=colorMap[socket.id]||PC[0];
+    brushColor=myColor;
+    buildColorPicker();
+    document.getElementById('rn').textContent=imp?'IMPOSTER':'PLAYER';
+    document.getElementById('rn').style.color=imp?'#555':'#f0f0f0';
+    if(gameMode==='draw'){
+      document.getElementById('rw').textContent=imp?'':word;
+      document.getElementById('rt').textContent=imp?'Edition: '+(EDITIONS[ed]?.name||ed)+'\n\nBlend in by drawing something convincing!':'Draw this — keep it subtle!';
+      document.getElementById('rcd').style.display='flex';
+      document.getElementById('rcd').style.background=myColor;
+      const isMyTurn=currentPlayer.id===socket.id;
+      if(isMyTurn && !imp) document.getElementById('dw').innerHTML='draw: <b>'+word+'</b>';
+      else if(!imp) document.getElementById('dw').innerHTML='draw: <b style="color:#555">???</b>';
+      else document.getElementById('dw').innerHTML='IMPOSTER — edition: <b>'+(EDITIONS[ed]?.name||ed)+'</b>';
+      document.getElementById('skip-count').textContent='';
+      document.getElementById('skip-btn').classList.remove('voted');
+    } else {
+      document.getElementById('rw').textContent='';
+      document.getElementById('rt').textContent=imp?'You have NO clue what the word is.\n\nListen and blend in!':'Clue: '+hint+'\n\nThe imposter has no idea!';
+      document.getElementById('rcd').style.display='none';
+      document.getElementById('w-ed').textContent=(EDITIONS[ed]?.icon||'')+' '+(EDITIONS[ed]?.name||ed);
+      document.getElementById('w-clue').textContent=imp?'You are the imposter — no clue! Blend in.':hint;
+      rnGuesses([],players);
+    }
+    go('sc-role');
+    const chk=setInterval(()=>{
+      if(ready){
+        clearInterval(chk);
+        if(gameMode==='draw'){updDTurn(currentPlayer,round,totalRounds);fitC();}
+        else updWTurn(currentPlayer,round,totalRounds);
+      }
+    },100);
+  });
+
+  socket.on('turnChange',({currentPlayer,round,totalRounds})=>{ctx.beginPath();updDTurn(currentPlayer,round,totalRounds);});
+  socket.on('skipVotesUpdate',({count,needed})=>{
+    const sc=document.getElementById('skip-count');
+    sc.textContent=count>0?count+'/'+needed:'';
+  });
+  socket.on('strokeStart',({x,y,color:c,size:s,playerId})=>{ctx.strokeStyle=colorMap[playerId]||c;ctx.lineWidth=s;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(x,y);});
+  socket.on('strokeMove',({x,y})=>{ctx.lineTo(x,y);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y);});
+  socket.on('strokeEnd',()=>ctx.beginPath());
+  socket.on('wordTurnChange',({currentPlayer,round,totalRounds,guesses})=>{wGuesses=guesses||[];rnGuesses(wGuesses,allPlayers);updWTurn(currentPlayer,round,totalRounds);});
+  socket.on('wordGuessUpdate',({guesses})=>{wGuesses=guesses;rnGuesses(wGuesses,allPlayers);});
+  socket.on('phaseChange',({phase,players,impostor})=>{
+    if(phase==='voting'){voted=false;allPlayers=players;rnVotes(players,{});go('sc-vote');}
+    if(phase==='impostorGuess'){
+      if(socket.id===impostor.id){
+        document.getElementById('gi').innerHTML='<div class="title" style="font-size:clamp(36px,9vw,52px);letter-spacing:4px;line-height:0.9;margin-bottom:16px">CAUGHT!<br><span style="color:#555;font-size:0.7em">Guess the word to win!</span></div><div style="width:100%"><div class="lbl">what was the word?</div><input id="g-inp" placeholder="Your guess..." autocomplete="off" style="font-size:16px"><button class="btn" onclick="sendGuess()">SUBMIT GUESS</button></div>';
+      } else {
+        document.getElementById('gi').innerHTML='<div class="title" style="font-size:clamp(36px,9vw,52px);letter-spacing:4px;line-height:0.9;margin-bottom:16px">IMPOSTER<br>CAUGHT!</div><div class="mono dim" style="font-size:12px;letter-spacing:2px;text-transform:uppercase">waiting for imposter to guess...</div>';
+      }
+      go('sc-guess');
+    }
+  });
+  socket.on('voteUpdate',({votes,players})=>rnVotes(players,votes));
+  socket.on('gameResults',({impostorWon,impostor,word,guess,reason})=>showRes(impostorWon,impostor,word,guess,reason));
+  socket.on('backToLobby',({players,maxPlayers})=>{
+    voted=false;whoVisible=false;skipVoted=false;
+    rnLob(players,maxPlayers);
+    document.getElementById('lob-sw').style.display=isHost?'block':'none';
+    document.getElementById('lob-w').style.display=isHost?'none':'block';
+    go('sc-lobby');
+  });
+  socket.on('error',({message})=>showErr('h-err',message));
+}
+
+cvs.addEventListener('mousedown',e=>{
+  if(!myTurn||hasStroke)return;drawing=true;
+  const p=gp(e);snap=ctx.getImageData(0,0,600,450);
+  const c=brushColor||colorMap[socket?.id]||PC[0];
+  ctx.strokeStyle=c;ctx.lineWidth=brushSz;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(p.x,p.y);
+  socket.emit('strokeStart',{x:p.x,y:p.y,color:c,size:brushSz});
+});
+cvs.addEventListener('mousemove',e=>{if(!drawing||!myTurn)return;const p=gp(e);ctx.lineTo(p.x,p.y);ctx.stroke();ctx.beginPath();ctx.moveTo(p.x,p.y);socket.emit('strokeMove',{x:p.x,y:p.y});});
+cvs.addEventListener('mouseup',endD);cvs.addEventListener('mouseleave',endD);
+cvs.addEventListener('touchstart',e=>{
+  e.preventDefault();if(!myTurn||hasStroke)return;drawing=true;
+  const p=gp(e.touches[0]);snap=ctx.getImageData(0,0,600,450);
+  const c=brushColor||colorMap[socket?.id]||PC[0];
+  ctx.strokeStyle=c;ctx.lineWidth=brushSz;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(p.x,p.y);
+  socket.emit('strokeStart',{x:p.x,y:p.y,color:c,size:brushSz});
+},{passive:false});
+cvs.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing||!myTurn)return;const p=gp(e.touches[0]);ctx.lineTo(p.x,p.y);ctx.stroke();ctx.beginPath();ctx.moveTo(p.x,p.y);socket.emit('strokeMove',{x:p.x,y:p.y});},{passive:false});
+cvs.addEventListener('touchend',endD);
+
+function endD(){if(!drawing)return;drawing=false;hasStroke=true;document.getElementById('undo-btn').disabled=false;document.getElementById('done-btn').disabled=false;}
+function gp(e){const r=cvs.getBoundingClientRect();return{x:(e.clientX-r.left)*(cvs.width/r.width),y:(e.clientY-r.top)*(cvs.height/r.height)};}
+function fitC(){setTimeout(()=>{const a=document.getElementById('ca');if(!a)return;const mw=a.clientWidth-12;const mh=a.clientHeight-12;const sc=Math.min(1,mw/600,mh/450);cvs.style.width=(600*sc)+'px';cvs.style.height=(450*sc)+'px';},80);}
+window.addEventListener('resize',fitC);
+</script>
 </body>
 </html>
