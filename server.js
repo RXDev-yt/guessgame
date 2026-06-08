@@ -1,10 +1,36 @@
-iding a hog charges at the tower'},
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const path = require('path');
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+const EDITIONS = {
+  roblox: { name: 'Roblox', words: [
+    {word:'Adopt Me',clue:'Popular game where you raise and trade virtual pets'},
+    {word:'Brookhaven',clue:'Roleplay game where you live in a town and own homes'},
+    {word:'Jailbreak',clue:'Cops vs robbers open world game with heists'},
+    {word:'Tower of Hell',clue:'Obby game with no checkpoints that gets harder'},
+    {word:'Arsenal',clue:'FPS game where you cycle through all weapons to win'},
+    {word:'Piggy',clue:'Horror game based on Peppa Pig where you escape a monster'},
+    {word:'Bedwars',clue:'Protect your bed while destroying others in this team game'},
+    {word:'Murder Mystery 2',clue:'One murderer, one sheriff, everyone else is innocent'},
+    {word:'Blox Fruits',clue:'One Piece inspired game with devil fruits and fighting'},
+    {word:'Pet Simulator',clue:'Collect and upgrade pets to earn coins and gems'}
+  ]},
+  clashroyale: { name: 'Clash Royale', words: [
+    {word:'Goblin Barrel',clue:'A barrel thrown that releases goblins at the tower'},
+    {word:'Hog Rider',clue:'A muscular man riding a hog that charges at towers'},
     {word:'Skeleton Army',clue:'A huge mob of skeletons that swarms enemies'},
-    {word:'Fireball',clue:'A ball of fire launched that deals area damage'},
+    {word:'Fireball',clue:'A ball of fire that deals area damage'},
     {word:'Witch',clue:'A flying unit that spawns skeletons'},
     {word:'PEKKA',clue:'Giant armored robot with huge swords'},
-    {word:'Electro Wizard',clue:'A wizard who shoots lightning and zaps multiple units'},
-    {word:'Lava Hound',clue:'A giant flying dog that splits into small ones when destroyed'},
+    {word:'Electro Wizard',clue:'A wizard who shoots lightning at multiple units'},
+    {word:'Lava Hound',clue:'A giant flying dog that splits into smaller ones'},
     {word:'Mega Knight',clue:'A giant knight that jumps and deals damage on landing'},
     {word:'Royal Ghost',clue:'An invisible swordsman that appears only when attacking'}
   ]},
@@ -13,7 +39,7 @@ iding a hog charges at the tower'},
     {word:'Spike',clue:'Cactus brawler that throws needles in a star pattern'},
     {word:'Leon',clue:'Brawler who can turn invisible with his super'},
     {word:'Crow',clue:'Fast brawler who throws poison daggers'},
-    {word:'Frank',clue:'Slow brawler with huge hammer that stuns on super'},
+    {word:'Frank',clue:'Slow brawler with a huge hammer that stuns on super'},
     {word:'Piper',clue:'Long range brawler that deals more damage from far away'},
     {word:'Mortis',clue:'Brawler who dashes with a shovel to deal damage'},
     {word:'El Primo',clue:'Wrestler brawler who punches and jumps on enemies'},
@@ -21,20 +47,20 @@ iding a hog charges at the tower'},
     {word:'Brock',clue:'Brawler who shoots rockets with long range'}
   ]},
   celebrity: { name: 'Celebrity', words: [
-    {word:'Elon Musk',clue:'Tech billionaire who owns Tesla, SpaceX and X (Twitter)'},
+    {word:'Elon Musk',clue:'Tech billionaire who owns Tesla, SpaceX and X'},
     {word:'MrBeast',clue:'Most subscribed YouTuber known for expensive challenges'},
     {word:'Cristiano Ronaldo',clue:'Portuguese football star known for his goal celebrations'},
     {word:'Taylor Swift',clue:'Pop star known for writing songs about her relationships'},
-    {word:'Lionel Messi',clue:'Argentine football legend with 8 Ballon d\'Or awards'},
-    {word:'Pewdiepie',clue:'Swedish YouTuber who was #1 subscribed for years'},
-    {word:'Drake',clue:'Canadian rapper known for hits like God\'s Plan'},
+    {word:'Lionel Messi',clue:'Argentine football legend with multiple Ballon dOr awards'},
+    {word:'Pewdiepie',clue:'Swedish YouTuber who was number one subscribed for years'},
+    {word:'Drake',clue:'Canadian rapper known for hits like Gods Plan'},
     {word:'Kylie Jenner',clue:'Reality TV star turned cosmetics billionaire'},
     {word:'KSI',clue:'British YouTuber turned boxer and musician'},
-    {word:'Ronaldo R9',clue:'Brazilian who is considered one of the best ever'}
+    {word:'Ronaldo R9',clue:'Brazilian considered one of the best footballers ever'}
   ]},
   general: { name: 'General', words: [
     {word:'Eiffel Tower',clue:'Famous iron lattice tower built in Paris in 1889'},
-    {word:'Pizza',clue:'Italian dish with dough, sauce and cheese baked in an oven'},
+    {word:'Pizza',clue:'Italian dish with dough sauce and cheese baked in oven'},
     {word:'Shark',clue:'Large predatory fish with multiple rows of teeth'},
     {word:'Astronaut',clue:'Person trained to travel and work in outer space'},
     {word:'Volcano',clue:'Mountain that can erupt with lava and ash'},
@@ -52,6 +78,8 @@ function genCode() { return Math.random().toString(36).substring(2, 7).toUpperCa
 function getPlayer(room, id) { return room.players.find(p => p.id === id); }
 
 function nextDrawTurn(room) {
+  room.skipVotes = {};
+  io.to(room.code).emit('skipVotesUpdate', { count: 0, needed: room.players.length });
   room.currentTurn = (room.currentTurn + 1) % room.players.length;
   if (room.currentTurn === 0) room.round++;
   if (room.round >= room.totalRounds) {
@@ -88,7 +116,7 @@ io.on('connection', (socket) => {
       code, players: [], phase: 'lobby',
       word: null, hint: null, wordData: null,
       impostorId: null, currentTurn: 0, round: 0, totalRounds: 5,
-      strokes: [], votes: {}, currentStroke: null,
+      strokes: [], votes: {}, skipVotes: {}, currentStroke: null,
       maxPlayers: maxPlayers || 4,
       gameMode: gameMode || 'draw',
       edition: edition || 'roblox',
@@ -123,7 +151,7 @@ io.on('connection', (socket) => {
     const wordData = rnd(ed.words);
     room.word = wordData.word; room.hint = wordData.clue; room.wordData = wordData;
     room.phase = room.gameMode === 'draw' ? 'drawing' : 'word';
-    room.round = 0; room.currentTurn = 0; room.strokes = []; room.votes = {}; room.wordGuesses = [];
+    room.round = 0; room.currentTurn = 0; room.strokes = []; room.votes = {}; room.skipVotes = {}; room.wordGuesses = [];
     room.impostorId = rnd(room.players).id;
     room.players.forEach(p => {
       const imp = p.id === room.impostorId;
@@ -137,7 +165,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  // DRAW events
   socket.on('strokeStart', ({ x, y, color, size }) => {
     const code = socket.roomCode; const room = rooms[code];
     if (!room || room.phase !== 'drawing') return;
@@ -164,7 +191,19 @@ io.on('connection', (socket) => {
     nextDrawTurn(room);
   });
 
-  // WORD events
+  socket.on('voteSkip', () => {
+    const code = socket.roomCode; const room = rooms[code];
+    if (!room || room.phase !== 'drawing') return;
+    room.skipVotes[socket.id] = true;
+    const count = Object.keys(room.skipVotes).length;
+    io.to(code).emit('skipVotesUpdate', { count, needed: room.players.length });
+    if (count >= room.players.length) {
+      room.skipVotes = {};
+      room.phase = 'voting';
+      io.to(code).emit('phaseChange', { phase: 'voting', players: room.players });
+    }
+  });
+
   socket.on('submitWordGuess', ({ guess }) => {
     const code = socket.roomCode; const room = rooms[code];
     if (!room || room.phase !== 'word') return;
@@ -216,7 +255,7 @@ io.on('connection', (socket) => {
     if (!host || !host.isHost) return;
     room.phase = 'lobby'; room.word = null; room.hint = null;
     room.impostorId = null; room.round = 0; room.currentTurn = 0;
-    room.strokes = []; room.votes = {}; room.currentStroke = null; room.wordGuesses = [];
+    room.strokes = []; room.votes = {}; room.skipVotes = {}; room.currentStroke = null; room.wordGuesses = [];
     room.players.forEach(p => p.vote = null);
     io.to(code).emit('backToLobby', { players: room.players, maxPlayers: room.maxPlayers });
   });
